@@ -25,7 +25,7 @@ export function validateModalConfig(config: any) {
     return {
       success: false,
       error: "Invalid configuration",
-      details: result.error.errors.map((e: any) => `${e.path.join(".")}: ${e.message}`)
+      details: result.error.issues.map((e: any) => `${e.path.join(".")}: ${e.message}`)
     };
   }
   return {
