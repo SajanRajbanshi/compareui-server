@@ -45,6 +45,11 @@ import {
   getTabsConfigSchemaDescription,
 } from "../validators/tabsConfigValidator.js";
 
+import {
+  validateProgressConfig,
+  getProgressConfigSchemaDescription,
+} from "../validators/progressConfigValidator.js";
+
 // Initialize Gemini AI lazily to ensure env vars are loaded
 let model: any = null;
 
@@ -887,6 +892,84 @@ export async function generateTabsConfig(
 }
 
 /**
+ * Generate system prompt for progress config generation
+ */
+function generateProgressSystemPrompt(currentConfig: any, userPrompt: string): string {
+  return `You are a UI configuration generator. Your task is to modify the current progress component configuration based on the user's request.
+
+${getProgressConfigSchemaDescription()}
+
+CURRENT CONFIGURATION:
+${JSON.stringify(currentConfig, null, 2)}
+
+USER REQUEST: "${userPrompt}"
+
+INSTRUCTIONS:
+1. Analyze the user's request carefully.
+2. Modify ONLY the properties mentioned in the request.
+3. Keep all other properties unchanged from the current config.
+4. Return ONLY valid JSON matching the schema above.
+5. Do NOT include any explanations, markdown formatting, or code blocks.
+6. Return raw JSON only.
+7. Ensure all colors are 6-character HEX codes (e.g. #FF0000). Names like "red" are NOT allowed.
+
+Example: If user says "make the bar green", change indicatorColor to "#00FF00", and keep other properties.
+
+Generate the modified configuration JSON now:`;
+}
+
+/**
+ * Generate progress configuration using Gemini AI
+ */
+export async function generateProgressConfig(
+  request: GenerateConfigRequest,
+): Promise<GenerateConfigResponse> {
+  const { prompt, currentConfig } = request;
+
+  let lastValidationError: string = "";
+  let attempts = 0;
+
+  for (let i = 0; i < MAX_RETRIES; i++) {
+    attempts++;
+
+    try {
+      let systemPrompt = generateProgressSystemPrompt(currentConfig, prompt);
+
+      if (i > 0 && lastValidationError) {
+        systemPrompt += `\n\nPREVIOUS ATTEMPT FAILED WITH ERRORS:\n${lastValidationError}\n\nPlease fix these errors and try again.`;
+      }
+
+      console.log(`Generating progress config (attempt ${attempts})...`);
+      const result = await getModel().generateContent(systemPrompt);
+      const response = await result.response;
+      const text = response.text();
+      
+      const generatedConfig = extractJSON(text);
+      const validation = validateProgressConfig(generatedConfig);
+
+      if (validation.success) {
+        return {
+          success: true,
+          config: validation.data,
+          attempts,
+        };
+      }
+
+      lastValidationError = validation.details?.join("\n") || validation.error || "Unknown validation error";
+    } catch (error) {
+      lastValidationError = error instanceof Error ? error.message : "Unknown error occurred";
+    }
+  }
+
+  return {
+    success: false,
+    error: `Failed to generate valid configuration after ${MAX_RETRIES} attempts`,
+    lastError: lastValidationError,
+    attempts,
+  };
+}
+
+/**
  * Generate configuration for any supported component
  * Routes to appropriate generator based on componentName
  */
@@ -920,6 +1003,9 @@ export async function generateConfig(
 
     case 'tabs':
       return generateTabsConfig(request);
+
+    case 'progress':
+      return generateProgressConfig(request);
 
     default:
       return {
