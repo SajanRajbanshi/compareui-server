@@ -13,6 +13,10 @@
   "author": "sajan",
   "license": "ISC",
   "dependencies": {
+    "@babel/core": "^7.29.0",
+    "@babel/preset-react": "^7.28.5",
+    "@babel/preset-typescript": "^7.28.5",
+    "@babel/standalone": "^7.29.1",
     "@google/generative-ai": "^0.24.1",
     "cors": "^2.8.6",
     "dotenv": "^17.2.3",
@@ -21,6 +25,8 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@types/babel__core": "^7.20.5",
+    "@types/babel__standalone": "^7.1.9",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/node": "^25.2.0",

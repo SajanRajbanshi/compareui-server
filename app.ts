@@ -16,6 +16,9 @@ app.get('/', (req, res) => {
 });
 
 import configRoutes from './routes/configRoutes.js';
+import codeRoutes from './routes/codeRoutes.js';
+
 app.use('/api/config', configRoutes);
+app.use('/api/code', codeRoutes);
 
 export default app;
