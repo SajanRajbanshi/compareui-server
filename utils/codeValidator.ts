@@ -1,4 +1,4 @@
-import { transform } from '@babel/core';
+import { transform } from '@babel/standalone';
 
 export interface ValidationResult {
   success: boolean;
@@ -16,8 +16,9 @@ export function validateCode(code: string, provider?: string): ValidationResult 
   try {
     transform(code, {
       presets: [
-        ['@babel/preset-react', { runtime: 'automatic' }],
-        '@babel/preset-typescript'
+        ['env', { modules: 'commonjs' }],
+        'react',
+        'typescript'
       ],
       filename: 'generated.tsx'
     });

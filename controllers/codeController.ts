@@ -43,6 +43,7 @@ export async function generateComponentCode(req: Request, res: Response) {
             for (const provider in generatedConfig) {
                 const validation = validateCode(generatedConfig[provider], provider);
                 if (!validation.success) {
+                    console.warn(`Validation failed for ${provider}:`, validation.error);
                     allValid = false;
                     validationError = `Provider ${provider}: ${validation.error}`;
                     break;
