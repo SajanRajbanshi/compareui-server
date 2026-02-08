@@ -20,7 +20,7 @@ export async function generateComponentCode(req: Request, res: Response) {
 
     let lastError = '';
     let currentCode = prevCode;
-    const MAX_CODE_RETRIES = 5;
+    const MAX_CODE_RETRIES = 3;
 
     for (let i = 0; i < MAX_CODE_RETRIES; i++) {
         // Call AI service with componentName='playground'
