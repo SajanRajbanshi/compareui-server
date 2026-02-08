@@ -45,7 +45,7 @@ export async function generateComponentConfig(req: Request, res: Response) {
         responseConfig: JSON.stringify(result.config),
         currentConfig: JSON.stringify(currentConfig)
       });
-      newPrompt.save();
+      await newPrompt.save();
       return res.status(200).json(result);
     } else {
       return res.status(400).json(result);
