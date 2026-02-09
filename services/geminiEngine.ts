@@ -9,7 +9,7 @@ export function getModel() {
       throw new Error('GEMINI_API_KEY is not defined in environment variables');
     }
     const genAI = new GoogleGenerativeAI(apiKey);
-    model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
+    model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
   }
   return model;
 }
